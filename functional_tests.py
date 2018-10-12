@@ -41,7 +41,7 @@ class NewVisitorTest(unittest.TestCase):
         rows = table.find_elements_by_tag_name('tr')
         self.assertTrue(
             any(row.text == '1: Buy a display cable for the PC' for row in rows),
-            git ad"New to-do item did not appear in the table"
+            "New to-do item did not appear in the table"
         )
 
         # A text box to add another item should be still visible. I should be able to add another item
