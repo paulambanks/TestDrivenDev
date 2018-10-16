@@ -39,17 +39,23 @@ class NewVisitorTest(unittest.TestCase):
 
         table = self.browser.find_element_by_id('id_list_table')
         rows = table.find_elements_by_tag_name('tr')
-        self.assertTrue(
-            any(row.text == '1: Buy a display cable for the PC' for row in rows),
-            "New to-do item did not appear in the table"
-        )
+        self.assertIn('1: Buy a display cable for the PC', [row.text for row in rows])
 
         # A text box to add another item should be still visible. I should be able to add another item
+        inputbox = self.browser.find_element_by_id('id_new_item')
+        inputbox.send_keys('Connect the PC with a new cable')
+
+        # On Enter I should see both items on to-do page.
+        inputbox.send_keys(Keys.ENTER)
+        time.sleep(1)
+
+        table = self.browser.find_element_by_id('id_list_table')
+        rows = table.find_elements_by_tag_name('tr')
+        self.assertIn('1: Buy a display cable for the PC', [row.text for row in rows])
+        self.assertIn('2: Connect the PC with a new cable', [row.text for row in rows])
+
+        # The site should remember my list even if I close the browser.
         self.fail('Finish the test!')
-
-    # On Enter I should see both items on to-do page.
-
-    # The site should remember my list even if I close the browser.
     # Site should generate a unique URL for the user and explanatory text
 
     # Visiting the URL opens my to-do list with all added items
