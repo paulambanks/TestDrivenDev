@@ -2,6 +2,10 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 import time
 from django.test import LiveServerTestCase
+from selenium.common.exceptions import WebDriverException
+
+
+MAX_WAIT = 10
 
 
 class NewVisitorTest(LiveServerTestCase):
@@ -14,12 +18,20 @@ class NewVisitorTest(LiveServerTestCase):
         self.browser.quit()
 
     # Helper method
-    def check_for_row_in_list_table(self, row_text):
-        table = self.browser.find_element_by_id('id_list_table')
-        rows = table.find_elements_by_tag_name('tr')
-        self.assertIn(row_text, [row.text for row in rows])
+    def wait_for_row_in_list_table(self, row_text):
+        start_time = time.time()
+        while True:
+            try:
+                table = self.browser.find_element_by_id('id_list_table')
+                rows = table.find_elements_by_tag_name('tr')
+                self.assertIn(row_text, [row.text for row in rows])
+                return
+            except (AssertionError, WebDriverException) as e:
+                if time.time() - start_time > MAX_WAIT:
+                    raise e
+                time.sleep(0.5)
 
-    def test_can_start_a_list_and_retrieve_it_later(self):
+    def test_can_start_a_list_for_one_user(self):
         # I want to create a cool online to-do-app. I go to check out its homepage
         self.browser.get(self.live_server_url)
 
@@ -41,9 +53,7 @@ class NewVisitorTest(LiveServerTestCase):
         # When I hit Enter, the page should update and I should see my new item
         # '1: Buy a display cable for the PC' listed on the page of to-do list table.
         inputbox.send_keys(Keys.ENTER)
-        time.sleep(1)
-
-        self.check_for_row_in_list_table('1: Buy a display cable for the PC')
+        self.wait_for_row_in_list_table('1: Buy a display cable for the PC')
 
         # A text box to add another item should be still visible. I should be able to add another item
         inputbox = self.browser.find_element_by_id('id_new_item')
@@ -51,13 +61,55 @@ class NewVisitorTest(LiveServerTestCase):
 
         # On Enter I should see both items on to-do page.
         inputbox.send_keys(Keys.ENTER)
-        time.sleep(1)
 
-        self.check_for_row_in_list_table('1: Buy a display cable for the PC')
-        self.check_for_row_in_list_table('2: Connect the PC with a new cable')
+        self.wait_for_row_in_list_table('1: Buy a display cable for the PC')
+        self.wait_for_row_in_list_table('2: Connect the PC with a new cable')
 
         # The site should remember my list even if I close the browser.
         self.fail('Finish the test!')
-    # Site should generate a unique URL for the user and explanatory text
+        # Site should generate a unique URL for the user and explanatory text
 
-    # Visiting the URL opens my to-do list with all added items
+        # Visiting the URL opens my to-do list with all added items
+
+    def test_multiple_users_can_start_lists_at_different_urls (self):
+        # I want to start another to-do list
+        self.browser.get(self.live_server_url)
+
+        inputbox = self.browser.find_element_by_id('id_new_item')
+        inputbox.send_keys('Buy a display cable for the PC')
+        inputbox.send_keys(Keys.ENTER)
+
+        self.wait_for_row_in_list_table('1: Buy a display cable for the PC')
+
+        # Site should generate a unique URL for the user and explanatory text
+        paula_list_url = self.browser.current_url
+        self.assertRegex(paula_list_url, '/lists/.+')
+
+        # Now Nigel - new user, comes along to the site.
+
+        ## New browser session should be used to make sure that no information of
+        ## Paula's is coming through from cookies etc
+        self.browser.quit()
+        self.browser = webdriver.Chrome()
+
+        # Nigel visits the home page. There is no sign of Paula's list
+        self.browser.get(self.live_server_url)
+        page_text = self.browser.find_element_by_tag_name('body').text
+        self.assertNotIn('Buy a display cable for the PC', page_text)
+        self.assertNotIn('Connect the PC', page_text)
+
+        # Nigel starts a new list by entering a new item. He is less interesting than Paula
+        inputbox = self.browser.find_element_by_id('id_new_item')
+        inputbox.send_keys('Buy milk')
+        inputbox.send_keys(Keys.ENTER)
+        self.wait_for_row_in_list_table('1: Buy milk')
+
+        # Nigel gets his own unique URL
+        nigel_list_url = self.browser.current_url
+        self.assertRegex(nigel_list_url, '/lists/.+')
+        self.assertNotEqual(nigel_list_url, paula_list_url)
+
+        # Again, there is no trace of Paula's list
+        page_text = self.browser.find_element_by_tag_name('body').text
+        self.assertNotIn('Buy a display cable for the PC', page_text)
+        self.assertIn('Buy milk', page_text)
