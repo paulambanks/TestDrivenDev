@@ -66,9 +66,7 @@ class NewVisitorTest(LiveServerTestCase):
         self.wait_for_row_in_list_table('2: Connect the PC with a new cable')
 
         # The site should remember my list even if I close the browser.
-        self.fail('Finish the test!')
         # Site should generate a unique URL for the user and explanatory text
-
         # Visiting the URL opens my to-do list with all added items
 
     def test_multiple_users_can_start_lists_at_different_urls (self):
