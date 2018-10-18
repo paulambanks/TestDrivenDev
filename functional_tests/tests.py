@@ -83,10 +83,11 @@ class NewVisitorTest(LiveServerTestCase):
         paula_list_url = self.browser.current_url
         self.assertRegex(paula_list_url, '/lists/.+')
 
+        # -------------------------------------------------
         # Now Nigel - new user, comes along to the site.
 
-        ## New browser session should be used to make sure that no information of
-        ## Paula's is coming through from cookies etc
+        # New browser session should be used to make sure that *no information* of
+        # Paula's is coming through from cookies etc
         self.browser.quit()
         self.browser = webdriver.Chrome()
 
