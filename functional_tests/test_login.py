@@ -5,7 +5,7 @@ import re
 from .base import FunctionalTest
 
 TEST_EMAIL = 'paula@example.com'
-SUBJECT = "Your login link for TDD List"
+SUBJECT = "Your login link for your To-Do List"
 
 
 class LoginTest(FunctionalTest):
