@@ -32,7 +32,7 @@ class SendLoginEmailViewTest(TestCase):
         message = list(response.context['messages'])[0]
         self.assertEqual(
             message.message,
-            "Check your email, we've send you a link you can use to log in."
+            "Check your email, we've sent you a link you can use to log in."
         )
         self.assertEqual(message.tags, "success")
 
@@ -58,7 +58,7 @@ class SendLoginEmailViewTest(TestCase):
 class LoginViewTest(TestCase):
 
     def test_redirects_to_home_page(self, mock_auth):
-        response = self.client.get('/accounts/login?token=abc123')
+        response = self.client.get('/accounts/login?token=abcd123')
         self.assertRedirects(response, '/')
 
     def test_calls_authenticate_with_uid_from_get_request(self, mock_auth):

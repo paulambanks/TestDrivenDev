@@ -19,8 +19,8 @@
                    <a class="navbar-brand" href="/">TDD</a>
                     {% if user.email %}
                         <ul class="nav navbar-nav justify-content-end">
-                            <li class="navbar-text">Logged in as {{ user.email }}</li>
-                            <li><a href="#">Log out</a></li>
+                            <li class="navbar-text">Logged in as {{ user.email  }}</li>
+                            <li><a href="{% url 'logout' %}">Log out</a></li>
                         </ul>
                     {% else %}
                         <form class="form-group justify-content-end"
