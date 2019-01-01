@@ -6,6 +6,7 @@ from django.contrib import messages, auth
 
 from django.urls import reverse
 from accounts.models import Token
+from accounts.authentication import PasswordlessAuthenticationBackend
 
 
 def send_login_email(request):
@@ -29,9 +30,22 @@ def send_login_email(request):
 
 
 def login(request):
-    user = auth.authenticate(uid=request.GET.get('token'))
+    user = PasswordlessAuthenticationBackend().authenticate(uid=request.GET.get('token'))
+    print(user)
     if user:
         auth.login(request, user)
+    else:
+        print('error, problem with authentication')
+    return redirect('/')
+
+
+def login(request):
+    user = auth.authenticate(uid=request.GET.get('token'))
+    print(user)
+    if user:
+        auth.login(request, user)
+    else:
+        print('error, problem with authentication')
     return redirect('/')
 
 

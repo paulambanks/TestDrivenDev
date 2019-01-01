@@ -20,5 +20,5 @@ from django.contrib.auth.views import logout_then_login
 urlpatterns = [
     url(r'^send_login_email$', views.send_login_email, name='send_login_email'),
     url(r'^login$', views.login, name='login'),
-    url(r'^logout$', logout_then_login, name='logout')
+    url(r'^logout$', logout_then_login, name='logout'),
 ]
